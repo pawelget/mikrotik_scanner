@@ -4,7 +4,7 @@
 :local reportDir "sata1/reports"
 :local containerName "bso-scanner-podman"
 :local tarName "bso-scanner-podman.tar"
-:local tarUrl "https://github.com/pawelget/mikrotik_scanner/releases/bso-scanner-podman.tar"
+:local tarUrl "https://raw.githubusercontent.com/pawelget/mikrotik_scanner/main/releases/bso-scanner-podman.tar"
 
 # Container config
 /container/config/set registry-url=https://registry-1.docker.io tmpdir=($diskName . "/tmp")
