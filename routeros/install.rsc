@@ -94,6 +94,7 @@
 }
 
 # Dodanie bso-run-scan
+# Dodanie bso-run-scan
 /system/script/add name=bso-run-scan source={
     :local scanInterface "ether1"
     :local target ""
@@ -103,12 +104,10 @@
 
     :log info "BSO: starting automatic LAN scan"
 
-    :foreach a in=[/ip/address/find where interface=$scanInterface disabled=no] do={
-        :local addr [/ip/address/get $a address]
+    :local addrId [/ip/address/find where interface=$scanInterface]
 
-        :if (($target = "") && ($addr !~ "172.17.")) do={
-            :set target $addr
-        }
+    :if ([:len $addrId] > 0) do={
+        :set target [/ip/address/get $addrId address]
     }
 
     :if ($target = "") do={
