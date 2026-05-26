@@ -49,7 +49,7 @@
 /tool/e-mail/set address=$smtpAddress port=$smtpPort tls=$smtpTls from=$smtpFrom user=$smtpUser password=$bsoSmtpPassword
 
 # Czyszczenie zmiennej globalnej z haslem po zapisaniu konfiguracji e-mail.
-:set bsoSmtpPassword ""
+:set bsoSmtpPassword "CLEARED"
 
 :log info "BSO: e-mail configured"
 
