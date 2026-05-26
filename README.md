@@ -17,6 +17,12 @@ Automatyczny skaner sieci lokalnej uruchamiany jako kontener RouterOS.
 /tool/fetch url="https://raw.githubusercontent.com/pawelget/mikrotik_scanner/main/routeros/install.rsc" dst-path=install.rsc; /import install.rsc
 ```
 
+## Ręczne uruchomienie skanu
+
+```routeros
+/system/script/run bso-run-scan
+```
+
 ## Budowanie `.tar` na Windows + WSL Ubuntu
 
 W WSL:
