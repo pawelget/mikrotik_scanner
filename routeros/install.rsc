@@ -2,8 +2,6 @@
 # BSO MikroTik Scanner - installer for RouterOS
 # ============================================================
 
-:global bsoMailTo
-:global bsoSmtpPassword
 :global bsoTarget
 
 :local diskName "sata1"
@@ -15,23 +13,6 @@
 :local tarName "bso-scanner-podman.tar"
 :local tarUrl "https://raw.githubusercontent.com/pawelget/mikrotik_scanner/main/releases/bso-scanner-podman.tar"
 
-:local smtpAddress "smtp.gmail.com"
-:local smtpPort 587
-:local smtpTls "starttls"
-
-# Nadawca jest predefiniowany w instalatorze.
-# Haslo NIE jest trzymane w repozytorium.
-:local smtpFrom "bsomikrotik@gmail.com"
-:local smtpUser "bsomikrotik@gmail.com"
-
-:if ([:typeof $bsoMailTo] = "nothing") do={
-    :error "BSO: missing bsoMailTo"
-}
-
-:if ([:typeof $bsoSmtpPassword] = "nothing") do={
-    :error "BSO: missing bsoSmtpPassword"
-}
-
 :log info "BSO: installation started"
 
 # ============================================================
@@ -41,17 +22,6 @@
 :if ([:len [/file/find where name=$diskName]] = 0) do={
     :error "BSO: disk sata1 not found. Add and format disk first."
 }
-
-# ============================================================
-# E-mail configuration
-# ============================================================
-
-/tool/e-mail/set address=$smtpAddress port=$smtpPort tls=$smtpTls from=$smtpFrom user=$smtpUser password=$bsoSmtpPassword
-
-# Czyszczenie zmiennej globalnej z haslem po zapisaniu konfiguracji e-mail.
-:set bsoSmtpPassword "CLEARED"
-
-:log info "BSO: e-mail configured"
 
 # ============================================================
 # Container storage config
@@ -122,7 +92,6 @@
 
 /container/add file=$tarName interface=veth-bso mountlists=bso-reports root-dir=$rootDir cmd="auto" logging=yes
 
-# Po imporcie plik tar nie jest potrzebny.
 :if ([:len [/file/find where name=$tarName]] > 0) do={
     /file/remove [find where name=$tarName]
 }
@@ -142,16 +111,15 @@
 # ============================================================
 
 /system/script/add name=bso-send-report source={
-    :global bsoMailTo
-
     :local reportDir "sata1/reports"
-
-    :if ([:typeof $bsoMailTo] = "nothing") do={
-        :log error "BSO: missing bsoMailTo"
-        :error "BSO: missing bsoMailTo"
-    }
+    :local mailTo "CHANGE_ME@gmail.com"
 
     :log info "BSO: checking for report flags"
+
+    :if ($mailTo = "CHANGE_ME@gmail.com") do={
+        :log error "BSO: recipient e-mail is not configured. Edit bso-send-report script and change mailTo."
+        :error "BSO: mailTo not configured"
+    }
 
     :foreach flagId in=[/file/find where name~"sata1/reports/SEND_MAIL_"] do={
 
@@ -166,11 +134,11 @@
             :local subject ("BSO raport skanowania sieci " . $timestamp)
             :local body ("Automatyczny raport bezpieczenstwa sieci BSO. Znacznik czasu: " . $timestamp)
 
-            /tool/e-mail/send to=$bsoMailTo subject=$subject body=$body file=$summaryFile
+            /tool/e-mail/send to=$mailTo subject=$subject body=$body file=$summaryFile
 
             /file/remove [find where name~$timestamp]
 
-            :log info ("BSO: report sent to " . $bsoMailTo . " and files removed: " . $timestamp)
+            :log info ("BSO: report sent to " . $mailTo . " and files removed: " . $timestamp)
 
         } else={
             :log error ("BSO: summary not found for " . $timestamp)
@@ -245,7 +213,7 @@
     }
 }
 
-
-:log info "BSO: scheduler created but disabled"
 :log info "BSO: installation completed"
+:log info "BSO: configure SMTP in Tools -> Email"
+:log info "BSO: configure recipient in System -> Scripts -> bso-send-report"
 :log info "BSO: run manually with /system/script/run bso-run-scan"
